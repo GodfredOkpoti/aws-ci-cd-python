@@ -1,0 +1,30 @@
+version: 0.2
+
+env:
+  parameter-store:
+    DOCKER_REGISTRY_USERNAME: /myapp/docker-credentials/username
+    DOCKER_REGISTRY_PASSWORD: /myapp/docker-credentials/password
+    DOCKER_REGISTRY_URL: /myapp/docker-registry/url
+phases:
+  install:
+    runtime-versions:
+      python: 3.10
+  pre_build:
+    commands:
+      - echo "Installing dependencies..."
+      - pip install -r requirements.txt
+  build:
+    commands:
+      - echo "Running tests..."
+      - echo "Building Docker image..."
+      - echo "logging in docker hub"
+      - docker login -u "$DOCKER_REGISTRY_USERNAME" --password "$DOCKER_REGISTRY_PASSWORD"
+      - docker build -t "$DOCKER_REGISTRY_URL:latest" .
+      - docker push "$DOCKER_REGISTRY_URL:latest"
+  post_build:
+    commands:
+      - echo "Build completed successfully!"
+artifacts:
+  files:
+    - '**/*'
+  base-directory: ../simple-python-app
